@@ -3,9 +3,9 @@
 Lan Mouse Mobile is a mobile client for [Lan Mouse](https://github.com/feschber/lan-mouse), enabling you to control your desktop's mouse and keyboard from your mobile device.
 
 <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="/screenshots/dark.jpg?raw=true">
-    <source media="(prefers-color-scheme: light)" srcset="/screenshots/light.jpg?raw=true">
-    <img alt="Screenshot of Lan-Mouse" srcset="/screenshots/dark.jpg">
+    <source media="(prefers-color-scheme: dark)" srcset="/screenshots/dark.png?raw=true" height=500>
+    <source media="(prefers-color-scheme: light)" srcset="/screenshots/light.png?raw=true" height=500>
+    <img alt="Screenshot of Lan-Mouse" srcset="/screenshots/dark.png" height=500>
 </picture>
 
 ## Getting Started
