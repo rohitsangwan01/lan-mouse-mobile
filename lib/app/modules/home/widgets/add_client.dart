@@ -28,7 +28,7 @@ class _AddClientState extends State<AddClient> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog.adaptive(
+    return AlertDialog(
       title: const Text("Add Client"),
       content: Form(
         key: formKey,

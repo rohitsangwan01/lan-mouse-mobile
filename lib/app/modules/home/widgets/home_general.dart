@@ -34,12 +34,24 @@ class _HomeGeneralState extends State<HomeGeneral> {
     _syncHostAndPort();
   }
 
-  void toggleServer(bool isRunning) {
+  void toggleServer(bool isRunning) async {
     _syncHostAndPort();
-    if (!isRunning) {
-      lanMouseServer.startServer();
-    } else {
-      lanMouseServer.stopServer();
+    try {
+      if (!isRunning) {
+        await lanMouseServer.startServer();
+      } else {
+        lanMouseServer.stopServer();
+      }
+    } catch (e) {
+      showSnackbar(e);
+    }
+  }
+
+  void showSnackbar(message) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message.toString())),
+      );
     }
   }
 

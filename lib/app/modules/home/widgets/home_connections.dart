@@ -23,7 +23,7 @@ class _HomeConnectionsState extends State<HomeConnections> {
     super.initState();
   }
 
-  void connectClient(Client client) async{
+  void connectClient(Client client) async {
     lanMouseServer.startServer(ignoreIfAlreadyRunning: true);
     Navigator.push(
       context,
@@ -87,9 +87,7 @@ class _HomeConnectionsState extends State<HomeConnections> {
                   itemBuilder: (BuildContext context, int index) {
                     Client client = clients[index];
                     return InkWell(
-                      onTap: () {
-                        connectClient(client);
-                      },
+                      onTap: () => connectClient(client),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
