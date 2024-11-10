@@ -131,8 +131,10 @@ fn wire__crate__api__lan_mouse_server__connect_impl(
             let mut deserializer =
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
             let api_base_path = <String>::sse_decode(&mut deserializer);
-            let api_ip_add_srt = <String>::sse_decode(&mut deserializer);
+            let api_ip_addr = <String>::sse_decode(&mut deserializer);
             let api_port = <u16>::sse_decode(&mut deserializer);
+            let api_target_addr = <String>::sse_decode(&mut deserializer);
+            let api_target_port = <u16>::sse_decode(&mut deserializer);
             let api_rx = <ReceiverWrapper>::sse_decode(&mut deserializer);
             let api_sink =
                 <StreamSink<Vec<u8>, flutter_rust_bridge::for_generated::SseCodec>>::sse_decode(
@@ -145,8 +147,10 @@ fn wire__crate__api__lan_mouse_server__connect_impl(
                         let output_ok = Result::<_, ()>::Ok({
                             crate::api::lan_mouse_server::connect(
                                 api_base_path,
-                                &api_ip_add_srt,
+                                &api_ip_addr,
                                 api_port,
+                                &api_target_addr,
+                                api_target_port,
                                 api_rx,
                                 api_sink,
                             )

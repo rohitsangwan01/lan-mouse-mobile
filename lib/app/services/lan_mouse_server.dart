@@ -14,6 +14,7 @@ class LanMouseServer {
   String? _tempPath;
   rust.SenderWrapper? _sender;
   StreamSubscription? _streamSubscription;
+  Client defaultClient = Client(host: "0.0.0.0", port: 4242);
 
   Future<String> get _basePath async {
     if (_tempPath == null) {
@@ -35,8 +36,10 @@ class LanMouseServer {
 
     Stream<Uint8List> stream = rust.connect(
       basePath: await _basePath,
-      ipAddSrt: client.host,
-      port: client.port,
+      ipAddr: defaultClient.host,
+      port: defaultClient.port,
+      targetAddr: client.host,
+      targetPort: client.port,
       rx: receiver,
     );
 

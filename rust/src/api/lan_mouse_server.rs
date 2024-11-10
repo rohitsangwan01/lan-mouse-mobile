@@ -41,15 +41,20 @@ pub fn create_channel() -> (SenderWrapper, ReceiverWrapper) {
 /// Start a UdbSocket and create connection with given Client
 pub async fn connect(
     base_path: String,
-    ip_add_srt: &str,
+    ip_addr: &str,
     port: u16,
+    target_addr: &str,
+    target_port: u16,
     rx: ReceiverWrapper,
     sink: StreamSink<Vec<u8>>,
 ) {
     let cert = get_certificate(base_path).unwrap();
+
+    let socket = format!("{ip_addr}:{port}");
+    log::info!("Binding to {socket}");
     let udp_conn = Arc::new(UdpSocket::bind("0.0.0.0:0").await.unwrap());
 
-    let target_socket = SocketAddr::new(IpAddr::from_str(ip_add_srt).unwrap(), port);
+    let target_socket = SocketAddr::new(IpAddr::from_str(target_addr).unwrap(), target_port);
     if let Err(err) = udp_conn.connect(target_socket).await {
         log::info!("Faild to connect {err}");
         let _ = sink.add_error(err.to_string());

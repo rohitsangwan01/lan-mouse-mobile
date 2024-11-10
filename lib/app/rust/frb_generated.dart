@@ -84,8 +84,10 @@ abstract class RustLibApi extends BaseApi {
 
   Stream<Uint8List> crateApiLanMouseServerConnect(
       {required String basePath,
-      required String ipAddSrt,
+      required String ipAddr,
       required int port,
+      required String targetAddr,
+      required int targetPort,
       required ReceiverWrapper rx});
 
   Future<(SenderWrapper, ReceiverWrapper)>
@@ -153,16 +155,20 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   @override
   Stream<Uint8List> crateApiLanMouseServerConnect(
       {required String basePath,
-      required String ipAddSrt,
+      required String ipAddr,
       required int port,
+      required String targetAddr,
+      required int targetPort,
       required ReceiverWrapper rx}) {
     final sink = RustStreamSink<Uint8List>();
     unawaited(handler.executeNormal(NormalTask(
       callFfi: (port_) {
         final serializer = SseSerializer(generalizedFrbRustBinding);
         sse_encode_String(basePath, serializer);
-        sse_encode_String(ipAddSrt, serializer);
+        sse_encode_String(ipAddr, serializer);
         sse_encode_u_16(port, serializer);
+        sse_encode_String(targetAddr, serializer);
+        sse_encode_u_16(targetPort, serializer);
         sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerReceiverWrapper(
             rx, serializer);
         sse_encode_StreamSink_list_prim_u_8_strict_Sse(sink, serializer);
@@ -174,7 +180,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         decodeErrorData: null,
       ),
       constMeta: kCrateApiLanMouseServerConnectConstMeta,
-      argValues: [basePath, ipAddSrt, port, rx, sink],
+      argValues: [basePath, ipAddr, port, targetAddr, targetPort, rx, sink],
       apiImpl: this,
     )));
     return sink.stream;
@@ -183,7 +189,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   TaskConstMeta get kCrateApiLanMouseServerConnectConstMeta =>
       const TaskConstMeta(
         debugName: "connect",
-        argNames: ["basePath", "ipAddSrt", "port", "rx", "sink"],
+        argNames: [
+          "basePath",
+          "ipAddr",
+          "port",
+          "targetAddr",
+          "targetPort",
+          "rx",
+          "sink"
+        ],
       );
 
   @override

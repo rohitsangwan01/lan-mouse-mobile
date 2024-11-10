@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 class Client {
-  final String host;
-  final int port;
+  String host;
+  int port;
 
   Client({required this.host, required this.port});
 

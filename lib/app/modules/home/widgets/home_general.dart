@@ -20,7 +20,8 @@ class _HomeGeneralState extends State<HomeGeneral> {
   @override
   void initState() {
     super.initState();
-    portController.text = 4242.toString();
+    portController.text = lanMouseServer.defaultClient.port.toString();
+    hostnameController.text = lanMouseServer.defaultClient.host;
     _refreshData();
   }
 
@@ -45,6 +46,7 @@ class _HomeGeneralState extends State<HomeGeneral> {
     } catch (e) {
       showSnackbar("Failed to get fingerprint: $e");
     }
+    _syncHost();
   }
 
   void showSnackbar(message) {
@@ -53,6 +55,11 @@ class _HomeGeneralState extends State<HomeGeneral> {
         SnackBar(content: Text(message.toString())),
       );
     }
+  }
+
+  void _syncHost() {
+    lanMouseServer.defaultClient.host = hostnameController.text;
+    lanMouseServer.defaultClient.port = int.parse(portController.text);
   }
 
   @override
