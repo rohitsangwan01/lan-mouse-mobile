@@ -15,9 +15,15 @@ use webrtc_dtls::{
 };
 use webrtc_util::Conn;
 
-// from lan_mouse_proto::MAX_EVENT_SIZE;
+// From lan_mouse_proto::MAX_EVENT_SIZE;
 pub const MAX_EVENT_SIZE: usize = size_of::<u8>() + size_of::<u32>() + 2 * size_of::<f64>();
 
+#[flutter_rust_bridge::frb(init)]
+pub fn init_app() {
+    flutter_rust_bridge::setup_default_user_utils();
+}
+
+/// Channel Wrappers
 pub struct ReceiverWrapper(Receiver<Vec<u8>>);
 pub struct SenderWrapper(Sender<Vec<u8>>);
 impl SenderWrapper {
@@ -31,33 +37,6 @@ impl SenderWrapper {
 pub fn create_channel() -> (SenderWrapper, ReceiverWrapper) {
     let channel = channel::<Vec<u8>>(256);
     (SenderWrapper(channel.0), ReceiverWrapper(channel.1))
-}
-
-#[flutter_rust_bridge::frb(init)]
-pub fn init_app() {
-    flutter_rust_bridge::setup_default_user_utils();
-}
-
-pub fn get_fingerprint(path: String) -> Option<String> {
-    let cert = get_certificate(path);
-    if cert.is_none() {
-        return None;
-    }
-    let fingerprint = crypto::certificate_fingerprint(&cert.unwrap());
-    return Some(fingerprint);
-}
-
-fn get_certificate(path: String) -> Option<Certificate> {
-    let cert_path = PathBuf::from(path).join("lan-mouse.pem");
-    match crypto::load_or_generate_key_and_cert(&cert_path) {
-        Ok(c) => {
-            return Some(c);
-        }
-        Err(err) => {
-            println!("Failed to generate cert: {:?}", err);
-            return None;
-        }
-    };
 }
 
 pub async fn connect(
@@ -132,4 +111,26 @@ pub async fn connect(
             },
         }
     }
+}
+
+pub fn get_fingerprint(path: String) -> Option<String> {
+    let cert = get_certificate(path);
+    if cert.is_none() {
+        return None;
+    }
+    let fingerprint = crypto::certificate_fingerprint(&cert.unwrap());
+    return Some(fingerprint);
+}
+
+fn get_certificate(path: String) -> Option<Certificate> {
+    let cert_path = PathBuf::from(path).join("lan-mouse.pem");
+    match crypto::load_or_generate_key_and_cert(&cert_path) {
+        Ok(c) => {
+            return Some(c);
+        }
+        Err(err) => {
+            println!("Failed to generate cert: {:?}", err);
+            return None;
+        }
+    };
 }
