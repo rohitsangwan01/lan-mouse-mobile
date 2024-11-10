@@ -1,13 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:lan_mouse_mobile/app/rust/frb_generated.dart';
 import 'package:lan_mouse_mobile/app/modules/home/home.dart';
 import 'package:lan_mouse_mobile/app/services/storage_service.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await RustLib.init();
   await StorageService.instance.init();
+  runApp(const MyApp());
+}
 
-  runApp(
-    MaterialApp(
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
       darkTheme: ThemeData.dark().copyWith(
         scaffoldBackgroundColor: const Color(0xff282424),
@@ -29,6 +37,6 @@ void main() async {
       ),
       themeMode: ThemeMode.system,
       home: const HomeView(),
-    ),
-  );
+    );
+  }
 }
