@@ -11,8 +11,8 @@ flutter_rust_bridge = "=2.6.0"
 sha2 = "0.10.8"
 webrtc-dtls = { version = "0.10.0", features = ["pem"] }
 webrtc-util = "0.9.0"
-thiserror = "2.0.0"
-tokio = { version = "1.32.0", features = [
+thiserror = "2.0.2"
+tokio = { version = "1.41.1", features = [
     "io-util",
     "io-std",
     "macros",
@@ -24,8 +24,4 @@ tokio = { version = "1.32.0", features = [
 ] }
 tokio-util = "0.7.11"
 log = "0.4.20"
-env_logger = "0.11.3"
-local-channel = "0.1.5"
-lan-mouse-ipc = { git = "https://github.com/feschber/lan-mouse" }
-lan-mouse-proto = { git = "https://github.com/feschber/lan-mouse" }
-slab = "0.4.9"
+pool = "0.1.4"

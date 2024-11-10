@@ -29,11 +29,15 @@ class _ServerState extends State<Server> {
     setState(() {
       waitingForAck = true;
     });
-    bool entered = await lanMouseServer.enterClient(client: widget.client);
+    await lanMouseServer.enterClient(
+      client: widget.client,
+      onError: (String err) {
+        _showErrorDialog(err);
+      },
+    );
     setState(() {
       waitingForAck = false;
     });
-    if (!entered) _showRefreshDialog();
   }
 
   @override
@@ -42,7 +46,7 @@ class _ServerState extends State<Server> {
     lanMouseServer.leaveClient();
   }
 
-  void _showRefreshDialog() {
+  void _showErrorDialog(String error) {
     if (!context.mounted) return;
     showAdaptiveDialog(
       context: context,
@@ -50,21 +54,14 @@ class _ServerState extends State<Server> {
       builder: (_) {
         return AlertDialog.adaptive(
           title: const Text("Error"),
-          content: const Text("Failed to connect to client, please try again"),
+          content: Text(error),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
-                enterClient();
-              },
-              child: const Text("Retry"),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
                 Navigator.pop(context);
               },
-              child: const Text("Cancel"),
+              child: const Text("Ok"),
             )
           ],
         );

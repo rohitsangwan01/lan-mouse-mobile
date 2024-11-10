@@ -8,6 +8,7 @@ use std::{
 };
 use tokio::net::UdpSocket;
 pub use tokio::sync::mpsc::{channel, Receiver, Sender};
+use tokio_util::sync::CancellationToken;
 use webrtc_dtls::crypto::Certificate;
 use webrtc_dtls::{
     config::{Config, ExtendedMasterSecretType},
@@ -15,9 +16,12 @@ use webrtc_dtls::{
 };
 use webrtc_util::Conn;
 
-pub struct SenderWrapper(Sender<Vec<u8>>);
+// from lan_mouse_proto::MAX_EVENT_SIZE;
+pub const MAX_EVENT_SIZE: usize = size_of::<u8>() + size_of::<u32>() + 2 * size_of::<f64>();
+
 pub struct ReceiverWrapper(Receiver<Vec<u8>>);
 
+pub struct SenderWrapper(Sender<Vec<u8>>);
 impl SenderWrapper {
     pub async fn send(&self, data: Vec<u8>) {
         if let Err(err) = self.0.send(data).await {
@@ -26,13 +30,34 @@ impl SenderWrapper {
     }
 }
 
+// pub struct OneShotReceiverWrapper(oneshot::Receiver<u8>);
+
+// pub struct OneShotSenderWrapper(oneshot::Sender<u8>);
+// impl OneShotSenderWrapper {
+//     pub async fn send(&self, data: u8) {
+//         self.0.send(data);
+//     }
+// }
+
+pub struct CancellationTokenWrapper(CancellationToken);
+impl CancellationTokenWrapper {
+    pub async fn cancel(&self) {
+        self.0.cancel();
+    }
+
+    pub fn is_cancelled(&self) -> bool {
+        self.0.is_cancelled()
+    }
+}
+
+pub fn create_cancellation_token() -> CancellationTokenWrapper {
+    CancellationTokenWrapper(CancellationToken::new())
+}
+
 pub fn create_channel() -> (SenderWrapper, ReceiverWrapper) {
     let channel = channel::<Vec<u8>>(256);
     (SenderWrapper(channel.0), ReceiverWrapper(channel.1))
 }
-
-// from lan_mouse_proto::MAX_EVENT_SIZE;
-pub const MAX_EVENT_SIZE: usize = size_of::<u8>() + size_of::<u32>() + 2 * size_of::<f64>();
 
 #[flutter_rust_bridge::frb(init)]
 pub fn init_app() {
@@ -67,16 +92,15 @@ pub async fn connect(
     port: u16,
     rx: ReceiverWrapper,
     sink: StreamSink<Vec<u8>>,
+    cancel_token: CancellationTokenWrapper,
 ) {
     let cert = get_certificate(base_path).unwrap();
+    let udp_conn = Arc::new(UdpSocket::bind("0.0.0.0:0").await.unwrap());
 
-    let addr = SocketAddr::new(IpAddr::from_str(ip_add_srt).unwrap(), port);
-    let conn = Arc::new(UdpSocket::bind("0.0.0.0:0").await.unwrap());
-    log::info!("connecting to {addr} ...");
-
-    let target_socket = SocketAddr::new(IpAddr::from_str("192.168.1.49").unwrap(), port);
-    if let Err(err) = conn.connect(target_socket).await {
+    let target_socket = SocketAddr::new(IpAddr::from_str(ip_add_srt).unwrap(), port);
+    if let Err(err) = udp_conn.connect(target_socket).await {
         log::info!("Faild to connect {err}");
+        let _ = sink.add_error(err.to_string());
         return;
     }
     log::info!("Connected to Udp");
@@ -88,42 +112,50 @@ pub async fn connect(
         ..Default::default()
     };
 
-    let dtls = match DTLSConn::new(conn, config, true, None).await {
+    let dtls = match DTLSConn::new(udp_conn, config, true, None).await {
         Ok(conn) => conn,
         Err(err) => {
             log::info!("Failed to generate DtlsConnection: {err}");
+            let _ = sink.add_error(err.to_string());
             return;
         }
     };
 
     let mut receiver = rx.0;
     let mut buf = [0u8; MAX_EVENT_SIZE];
+
     loop {
         tokio::select! {
-            // Listen for incoming data from Dart
-            Some(data) = receiver.recv() => {
-                log::info!("Data From Dart: {data:?}");
-                if let Err(e) = dtls.send(&data).await {
-                    log::info!("Error sending to DTLS: `{e}`, closing connection");
-                    break;
-                }
-            },
+            // Handle cancellation signal
+            _ = cancel_token.0.cancelled() => {
+                log::info!("Cancellation token triggered, shutting down listener");
+                let _ = dtls.close().await;
+                break;
+            }
             // Listen for incoming DTLS messages
             result = dtls.recv(&mut buf) => {
                 match result {
                     Ok(_) => {
                         // Send the received data back to Dart
-                        if let Err(err) = sink.add(buf.to_vec()) {
-                            log::info!("Failed to send to sink: {err}");
-                        }
+                        let _  = sink.add(buf.to_vec());
                     }
                     Err(e) => {
                         log::info!("Error receiving from DTLS: `{e}`, closing connection");
-                        // let _ = dtls.close().await;
+                        let _ = sink.add_error(e.to_string());
+                        let _ = dtls.close().await;
                         break;
                     }
                 }
             }
+            // Listen for incoming data from Dart
+            Some(data) = receiver.recv() => {
+                if let Err(e) = dtls.send(&data).await {
+                    log::error!("Error sending to DTLS: `{e}`, closing connection");
+                    let _ = sink.add_error(e.to_string());
+                    let _ = dtls.close().await;
+                    break;
+                }
+            },
         }
     }
 }
