@@ -6,14 +6,26 @@
 import '../frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-// These functions are ignored because they are not marked as `pub`: `add_client`, `get_certificate`, `run_connection`
+// These functions are ignored because they are not marked as `pub`: `get_certificate`
+
+Future<(SenderWrapper, ReceiverWrapper)> createChannel() =>
+    RustLib.instance.api.crateApiLanMouseServerCreateChannel();
 
 Future<String?> getFingerprint({required String path}) =>
     RustLib.instance.api.crateApiLanMouseServerGetFingerprint(path: path);
 
-Future<void> connect(
+Stream<Uint8List> connect(
         {required String basePath,
         required String ipAddSrt,
-        required int port}) =>
+        required int port,
+        required ReceiverWrapper rx}) =>
     RustLib.instance.api.crateApiLanMouseServerConnect(
-        basePath: basePath, ipAddSrt: ipAddSrt, port: port);
+        basePath: basePath, ipAddSrt: ipAddSrt, port: port, rx: rx);
+
+// Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<ReceiverWrapper>>
+abstract class ReceiverWrapper implements RustOpaqueInterface {}
+
+// Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<SenderWrapper>>
+abstract class SenderWrapper implements RustOpaqueInterface {
+  Future<void> send({required List<int> data});
+}

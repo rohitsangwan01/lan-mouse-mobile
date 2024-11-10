@@ -36,9 +36,10 @@ class HomeView extends StatelessWidget {
                   ),
                   ElevatedButton(
                     onPressed: () async {
-                      String? fingerPrint =
-                          await RustService.instance.getFingerprint();
-                      print("fingerprint $fingerPrint");
+                      // String? fingerPrint =
+                      //     await RustService.instance.getFingerprint();
+                      // print("fingerprint $fingerPrint");
+                      RustService.instance.test();
                     },
                     child: const Text("Fingerprint"),
                   ),

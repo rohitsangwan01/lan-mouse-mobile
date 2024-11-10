@@ -1,6 +1,5 @@
 use crate::api::crypto;
-use lan_mouse_proto::ProtoEvent;
-use lan_mouse_proto::MAX_EVENT_SIZE;
+use crate::frb_generated::StreamSink;
 use std::sync::Arc;
 use std::{
     net::{IpAddr, SocketAddr},
@@ -8,12 +7,32 @@ use std::{
     str::FromStr,
 };
 use tokio::net::UdpSocket;
+pub use tokio::sync::mpsc::{channel, Receiver, Sender};
 use webrtc_dtls::crypto::Certificate;
 use webrtc_dtls::{
     config::{Config, ExtendedMasterSecretType},
     conn::DTLSConn,
 };
 use webrtc_util::Conn;
+
+pub struct SenderWrapper(Sender<Vec<u8>>);
+pub struct ReceiverWrapper(Receiver<Vec<u8>>);
+
+impl SenderWrapper {
+    pub async fn send(&self, data: Vec<u8>) {
+        if let Err(err) = self.0.send(data).await {
+            log::error!("Failed to send event {err}");
+        }
+    }
+}
+
+pub fn create_channel() -> (SenderWrapper, ReceiverWrapper) {
+    let channel = channel::<Vec<u8>>(256);
+    (SenderWrapper(channel.0), ReceiverWrapper(channel.1))
+}
+
+// from lan_mouse_proto::MAX_EVENT_SIZE;
+pub const MAX_EVENT_SIZE: usize = size_of::<u8>() + size_of::<u32>() + 2 * size_of::<f64>();
 
 #[flutter_rust_bridge::frb(init)]
 pub fn init_app() {
@@ -42,7 +61,13 @@ fn get_certificate(path: String) -> Option<Certificate> {
     };
 }
 
-pub async fn connect(base_path: String, ip_add_srt: &str, port: u16) {
+pub async fn connect(
+    base_path: String,
+    ip_add_srt: &str,
+    port: u16,
+    rx: ReceiverWrapper,
+    sink: StreamSink<Vec<u8>>,
+) {
     let cert = get_certificate(base_path).unwrap();
 
     let addr = SocketAddr::new(IpAddr::from_str(ip_add_srt).unwrap(), port);
@@ -62,31 +87,41 @@ pub async fn connect(base_path: String, ip_add_srt: &str, port: u16) {
         extended_master_secret: ExtendedMasterSecretType::Require,
         ..Default::default()
     };
-    let dtls: DTLSConn = match DTLSConn::new(conn, config, true, None).await {
+
+    let dtls = match DTLSConn::new(conn, config, true, None).await {
         Ok(conn) => conn,
         Err(err) => {
-            log::info!("Failed to generate DtlsConnection {err}");
+            log::info!("Failed to generate DtlsConnection: {err}");
             return;
         }
     };
-    log::info!("DtlsConn ready, Sending Ping");
-    let (buf, len) = ProtoEvent::Ping.into();
-    if let Err(e) = dtls.send(&buf[..len]).await {
-        log::info!("{addr}: send error `{e}`, closing connection");
-        let _ = dtls.close().await;
-    }
 
-    log::info!("Ping Sent");
+    let mut receiver = rx.0;
     let mut buf = [0u8; MAX_EVENT_SIZE];
-    while dtls.recv(&mut buf).await.is_ok() {
-        if let Ok(event) = buf.try_into() {
-            log::info!("{addr} <==<==<== {event}");
-            match event {
-                ProtoEvent::Pong(b) => {
-                    log::info!("PONG <->->->->- {addr} {b}");
+    loop {
+        tokio::select! {
+            // Listen for incoming data from Dart
+            Some(data) = receiver.recv() => {
+                log::info!("Data From Dart: {data:?}");
+                if let Err(e) = dtls.send(&data).await {
+                    log::info!("Error sending to DTLS: `{e}`, closing connection");
+                    break;
                 }
-                _ => {
-                    log::info!("Event {event:?}")
+            },
+            // Listen for incoming DTLS messages
+            result = dtls.recv(&mut buf) => {
+                match result {
+                    Ok(_) => {
+                        // Send the received data back to Dart
+                        if let Err(err) = sink.add(buf.to_vec()) {
+                            log::info!("Failed to send to sink: {err}");
+                        }
+                    }
+                    Err(e) => {
+                        log::info!("Error receiving from DTLS: `{e}`, closing connection");
+                        // let _ = dtls.close().await;
+                        break;
+                    }
                 }
             }
         }
