@@ -8,7 +8,6 @@ use std::{
 };
 use tokio::net::UdpSocket;
 pub use tokio::sync::mpsc::{channel, Receiver, Sender};
-use tokio_util::sync::CancellationToken;
 use webrtc_dtls::crypto::Certificate;
 use webrtc_dtls::{
     config::{Config, ExtendedMasterSecretType},
@@ -20,7 +19,6 @@ use webrtc_util::Conn;
 pub const MAX_EVENT_SIZE: usize = size_of::<u8>() + size_of::<u32>() + 2 * size_of::<f64>();
 
 pub struct ReceiverWrapper(Receiver<Vec<u8>>);
-
 pub struct SenderWrapper(Sender<Vec<u8>>);
 impl SenderWrapper {
     pub async fn send(&self, data: Vec<u8>) {
@@ -28,30 +26,6 @@ impl SenderWrapper {
             log::error!("Failed to send event {err}");
         }
     }
-}
-
-// pub struct OneShotReceiverWrapper(oneshot::Receiver<u8>);
-
-// pub struct OneShotSenderWrapper(oneshot::Sender<u8>);
-// impl OneShotSenderWrapper {
-//     pub async fn send(&self, data: u8) {
-//         self.0.send(data);
-//     }
-// }
-
-pub struct CancellationTokenWrapper(CancellationToken);
-impl CancellationTokenWrapper {
-    pub async fn cancel(&self) {
-        self.0.cancel();
-    }
-
-    pub fn is_cancelled(&self) -> bool {
-        self.0.is_cancelled()
-    }
-}
-
-pub fn create_cancellation_token() -> CancellationTokenWrapper {
-    CancellationTokenWrapper(CancellationToken::new())
 }
 
 pub fn create_channel() -> (SenderWrapper, ReceiverWrapper) {
@@ -92,7 +66,6 @@ pub async fn connect(
     port: u16,
     rx: ReceiverWrapper,
     sink: StreamSink<Vec<u8>>,
-    cancel_token: CancellationTokenWrapper,
 ) {
     let cert = get_certificate(base_path).unwrap();
     let udp_conn = Arc::new(UdpSocket::bind("0.0.0.0:0").await.unwrap());
@@ -126,12 +99,6 @@ pub async fn connect(
 
     loop {
         tokio::select! {
-            // Handle cancellation signal
-            _ = cancel_token.0.cancelled() => {
-                log::info!("Cancellation token triggered, shutting down listener");
-                let _ = dtls.close().await;
-                break;
-            }
             // Listen for incoming DTLS messages
             result = dtls.recv(&mut buf) => {
                 match result {
@@ -149,6 +116,13 @@ pub async fn connect(
             }
             // Listen for incoming data from Dart
             Some(data) = receiver.recv() => {
+                // Check if cancel message
+                if data.len() == 0 {
+                    log::error!("Closing channels");
+                    let _ = dtls.close().await;
+                    break;
+                }
+
                 if let Err(e) = dtls.send(&data).await {
                     log::error!("Error sending to DTLS: `{e}`, closing connection");
                     let _ = sink.add_error(e.to_string());

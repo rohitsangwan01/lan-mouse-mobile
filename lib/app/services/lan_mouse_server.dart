@@ -13,7 +13,6 @@ class LanMouseServer {
 
   String? _tempPath;
   rust.SenderWrapper? _sender;
-  rust.CancellationTokenWrapper? _cancelToken;
   StreamSubscription? _streamSubscription;
 
   Future<String> get _basePath async {
@@ -32,7 +31,6 @@ class LanMouseServer {
     required Function(String) onError,
   }) async {
     var (sender, receiver) = await rust.createChannel();
-    _cancelToken = await rust.createCancellationToken();
     _sender = sender;
 
     Stream<Uint8List> stream = rust.connect(
@@ -40,7 +38,6 @@ class LanMouseServer {
       ipAddSrt: client.host,
       port: client.port,
       rx: receiver,
-      cancelToken: _cancelToken!,
     );
 
     _streamSubscription = stream.listen((data) {
@@ -53,11 +50,10 @@ class LanMouseServer {
   }
 
   void leaveClient() {
-    _cancelToken?.cancel();
+    // Send empty data to close all
+    _sender?.send(data: []);
     _streamSubscription?.cancel();
     _sender = null;
-    _cancelToken = null;
-    // Also dispose these
   }
 
   void sendInputEvent(InputEvent inputEvent) {

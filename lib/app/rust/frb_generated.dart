@@ -68,7 +68,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.6.0';
 
   @override
-  int get rustContentHash => 1639616000;
+  int get rustContentHash => -1167507244;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -79,12 +79,6 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
 }
 
 abstract class RustLibApi extends BaseApi {
-  Future<void> crateApiLanMouseServerCancellationTokenWrapperCancel(
-      {required CancellationTokenWrapper that});
-
-  Future<bool> crateApiLanMouseServerCancellationTokenWrapperIsCancelled(
-      {required CancellationTokenWrapper that});
-
   Future<void> crateApiLanMouseServerSenderWrapperSend(
       {required SenderWrapper that, required List<int> data});
 
@@ -92,11 +86,7 @@ abstract class RustLibApi extends BaseApi {
       {required String basePath,
       required String ipAddSrt,
       required int port,
-      required ReceiverWrapper rx,
-      required CancellationTokenWrapper cancelToken});
-
-  Future<CancellationTokenWrapper>
-      crateApiLanMouseServerCreateCancellationToken();
+      required ReceiverWrapper rx});
 
   Future<(SenderWrapper, ReceiverWrapper)>
       crateApiLanMouseServerCreateChannel();
@@ -104,15 +94,6 @@ abstract class RustLibApi extends BaseApi {
   Future<String?> crateApiLanMouseServerGetFingerprint({required String path});
 
   Future<void> crateApiLanMouseServerInitApp();
-
-  RustArcIncrementStrongCountFnType
-      get rust_arc_increment_strong_count_CancellationTokenWrapper;
-
-  RustArcDecrementStrongCountFnType
-      get rust_arc_decrement_strong_count_CancellationTokenWrapper;
-
-  CrossPlatformFinalizerArg
-      get rust_arc_decrement_strong_count_CancellationTokenWrapperPtr;
 
   RustArcIncrementStrongCountFnType
       get rust_arc_increment_strong_count_ReceiverWrapper;
@@ -142,63 +123,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   });
 
   @override
-  Future<void> crateApiLanMouseServerCancellationTokenWrapperCancel(
-      {required CancellationTokenWrapper that}) {
-    return handler.executeNormal(NormalTask(
-      callFfi: (port_) {
-        final serializer = SseSerializer(generalizedFrbRustBinding);
-        sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCancellationTokenWrapper(
-            that, serializer);
-        pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 1, port: port_);
-      },
-      codec: SseCodec(
-        decodeSuccessData: sse_decode_unit,
-        decodeErrorData: null,
-      ),
-      constMeta: kCrateApiLanMouseServerCancellationTokenWrapperCancelConstMeta,
-      argValues: [that],
-      apiImpl: this,
-    ));
-  }
-
-  TaskConstMeta
-      get kCrateApiLanMouseServerCancellationTokenWrapperCancelConstMeta =>
-          const TaskConstMeta(
-            debugName: "CancellationTokenWrapper_cancel",
-            argNames: ["that"],
-          );
-
-  @override
-  Future<bool> crateApiLanMouseServerCancellationTokenWrapperIsCancelled(
-      {required CancellationTokenWrapper that}) {
-    return handler.executeNormal(NormalTask(
-      callFfi: (port_) {
-        final serializer = SseSerializer(generalizedFrbRustBinding);
-        sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCancellationTokenWrapper(
-            that, serializer);
-        pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 2, port: port_);
-      },
-      codec: SseCodec(
-        decodeSuccessData: sse_decode_bool,
-        decodeErrorData: null,
-      ),
-      constMeta:
-          kCrateApiLanMouseServerCancellationTokenWrapperIsCancelledConstMeta,
-      argValues: [that],
-      apiImpl: this,
-    ));
-  }
-
-  TaskConstMeta
-      get kCrateApiLanMouseServerCancellationTokenWrapperIsCancelledConstMeta =>
-          const TaskConstMeta(
-            debugName: "CancellationTokenWrapper_is_cancelled",
-            argNames: ["that"],
-          );
-
-  @override
   Future<void> crateApiLanMouseServerSenderWrapperSend(
       {required SenderWrapper that, required List<int> data}) {
     return handler.executeNormal(NormalTask(
@@ -208,7 +132,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             that, serializer);
         sse_encode_list_prim_u_8_loose(data, serializer);
         pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 3, port: port_);
+            funcId: 1, port: port_);
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_unit,
@@ -231,8 +155,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       {required String basePath,
       required String ipAddSrt,
       required int port,
-      required ReceiverWrapper rx,
-      required CancellationTokenWrapper cancelToken}) {
+      required ReceiverWrapper rx}) {
     final sink = RustStreamSink<Uint8List>();
     unawaited(handler.executeNormal(NormalTask(
       callFfi: (port_) {
@@ -243,17 +166,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerReceiverWrapper(
             rx, serializer);
         sse_encode_StreamSink_list_prim_u_8_strict_Sse(sink, serializer);
-        sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCancellationTokenWrapper(
-            cancelToken, serializer);
         pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 4, port: port_);
+            funcId: 2, port: port_);
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_unit,
         decodeErrorData: null,
       ),
       constMeta: kCrateApiLanMouseServerConnectConstMeta,
-      argValues: [basePath, ipAddSrt, port, rx, sink, cancelToken],
+      argValues: [basePath, ipAddSrt, port, rx, sink],
       apiImpl: this,
     )));
     return sink.stream;
@@ -262,33 +183,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   TaskConstMeta get kCrateApiLanMouseServerConnectConstMeta =>
       const TaskConstMeta(
         debugName: "connect",
-        argNames: ["basePath", "ipAddSrt", "port", "rx", "sink", "cancelToken"],
-      );
-
-  @override
-  Future<CancellationTokenWrapper>
-      crateApiLanMouseServerCreateCancellationToken() {
-    return handler.executeNormal(NormalTask(
-      callFfi: (port_) {
-        final serializer = SseSerializer(generalizedFrbRustBinding);
-        pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 5, port: port_);
-      },
-      codec: SseCodec(
-        decodeSuccessData:
-            sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCancellationTokenWrapper,
-        decodeErrorData: null,
-      ),
-      constMeta: kCrateApiLanMouseServerCreateCancellationTokenConstMeta,
-      argValues: [],
-      apiImpl: this,
-    ));
-  }
-
-  TaskConstMeta get kCrateApiLanMouseServerCreateCancellationTokenConstMeta =>
-      const TaskConstMeta(
-        debugName: "create_cancellation_token",
-        argNames: [],
+        argNames: ["basePath", "ipAddSrt", "port", "rx", "sink"],
       );
 
   @override
@@ -298,7 +193,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       callFfi: (port_) {
         final serializer = SseSerializer(generalizedFrbRustBinding);
         pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 6, port: port_);
+            funcId: 3, port: port_);
       },
       codec: SseCodec(
         decodeSuccessData:
@@ -324,7 +219,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         final serializer = SseSerializer(generalizedFrbRustBinding);
         sse_encode_String(path, serializer);
         pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 7, port: port_);
+            funcId: 4, port: port_);
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_opt_String,
@@ -348,7 +243,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       callFfi: (port_) {
         final serializer = SseSerializer(generalizedFrbRustBinding);
         pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 8, port: port_);
+            funcId: 5, port: port_);
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_unit,
@@ -365,14 +260,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         debugName: "init_app",
         argNames: [],
       );
-
-  RustArcIncrementStrongCountFnType
-      get rust_arc_increment_strong_count_CancellationTokenWrapper => wire
-          .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCancellationTokenWrapper;
-
-  RustArcDecrementStrongCountFnType
-      get rust_arc_decrement_strong_count_CancellationTokenWrapper => wire
-          .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCancellationTokenWrapper;
 
   RustArcIncrementStrongCountFnType
       get rust_arc_increment_strong_count_ReceiverWrapper => wire
@@ -397,15 +284,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  CancellationTokenWrapper
-      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCancellationTokenWrapper(
-          dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return CancellationTokenWrapperImpl.frbInternalDcoDecode(
-        raw as List<dynamic>);
-  }
-
-  @protected
   ReceiverWrapper
       dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerReceiverWrapper(
           dynamic raw) {
@@ -422,29 +300,11 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  CancellationTokenWrapper
-      dco_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCancellationTokenWrapper(
-          dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return CancellationTokenWrapperImpl.frbInternalDcoDecode(
-        raw as List<dynamic>);
-  }
-
-  @protected
   SenderWrapper
       dco_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSenderWrapper(
           dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return SenderWrapperImpl.frbInternalDcoDecode(raw as List<dynamic>);
-  }
-
-  @protected
-  CancellationTokenWrapper
-      dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCancellationTokenWrapper(
-          dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return CancellationTokenWrapperImpl.frbInternalDcoDecode(
-        raw as List<dynamic>);
   }
 
   @protected
@@ -474,12 +334,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   String dco_decode_String(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw as String;
-  }
-
-  @protected
-  bool dco_decode_bool(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return raw as bool;
   }
 
   @protected
@@ -551,15 +405,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  CancellationTokenWrapper
-      sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCancellationTokenWrapper(
-          SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    return CancellationTokenWrapperImpl.frbInternalSseDecode(
-        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
-  }
-
-  @protected
   ReceiverWrapper
       sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerReceiverWrapper(
           SseDeserializer deserializer) {
@@ -578,29 +423,11 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  CancellationTokenWrapper
-      sse_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCancellationTokenWrapper(
-          SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    return CancellationTokenWrapperImpl.frbInternalSseDecode(
-        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
-  }
-
-  @protected
   SenderWrapper
       sse_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSenderWrapper(
           SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return SenderWrapperImpl.frbInternalSseDecode(
-        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
-  }
-
-  @protected
-  CancellationTokenWrapper
-      sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCancellationTokenWrapper(
-          SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    return CancellationTokenWrapperImpl.frbInternalSseDecode(
         sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
   }
 
@@ -634,12 +461,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var inner = sse_decode_list_prim_u_8_strict(deserializer);
     return utf8.decoder.convert(inner);
-  }
-
-  @protected
-  bool sse_decode_bool(SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    return deserializer.buffer.getUint8() != 0;
   }
 
   @protected
@@ -713,20 +534,16 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  bool sse_decode_bool(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return deserializer.buffer.getUint8() != 0;
+  }
+
+  @protected
   void sse_encode_AnyhowException(
       AnyhowException self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(self.message, serializer);
-  }
-
-  @protected
-  void
-      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCancellationTokenWrapper(
-          CancellationTokenWrapper self, SseSerializer serializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_usize(
-        (self as CancellationTokenWrapperImpl).frbInternalSseEncode(move: true),
-        serializer);
   }
 
   @protected
@@ -751,32 +568,11 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   void
-      sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCancellationTokenWrapper(
-          CancellationTokenWrapper self, SseSerializer serializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_usize(
-        (self as CancellationTokenWrapperImpl)
-            .frbInternalSseEncode(move: false),
-        serializer);
-  }
-
-  @protected
-  void
       sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSenderWrapper(
           SenderWrapper self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
         (self as SenderWrapperImpl).frbInternalSseEncode(move: false),
-        serializer);
-  }
-
-  @protected
-  void
-      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCancellationTokenWrapper(
-          CancellationTokenWrapper self, SseSerializer serializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_usize(
-        (self as CancellationTokenWrapperImpl).frbInternalSseEncode(move: null),
         serializer);
   }
 
@@ -817,12 +613,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   void sse_encode_String(String self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_list_prim_u_8_strict(utf8.encoder.convert(self), serializer);
-  }
-
-  @protected
-  void sse_encode_bool(bool self, SseSerializer serializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    serializer.buffer.putUint8(self ? 1 : 0);
   }
 
   @protected
@@ -891,38 +681,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     serializer.buffer.putInt32(self);
   }
-}
 
-@sealed
-class CancellationTokenWrapperImpl extends RustOpaque
-    implements CancellationTokenWrapper {
-  // Not to be used by end users
-  CancellationTokenWrapperImpl.frbInternalDcoDecode(List<dynamic> wire)
-      : super.frbInternalDcoDecode(wire, _kStaticData);
-
-  // Not to be used by end users
-  CancellationTokenWrapperImpl.frbInternalSseDecode(
-      BigInt ptr, int externalSizeOnNative)
-      : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
-
-  static final _kStaticData = RustArcStaticData(
-    rustArcIncrementStrongCount: RustLib
-        .instance.api.rust_arc_increment_strong_count_CancellationTokenWrapper,
-    rustArcDecrementStrongCount: RustLib
-        .instance.api.rust_arc_decrement_strong_count_CancellationTokenWrapper,
-    rustArcDecrementStrongCountPtr: RustLib.instance.api
-        .rust_arc_decrement_strong_count_CancellationTokenWrapperPtr,
-  );
-
-  Future<void> cancel() =>
-      RustLib.instance.api.crateApiLanMouseServerCancellationTokenWrapperCancel(
-        that: this,
-      );
-
-  Future<bool> isCancelled() => RustLib.instance.api
-          .crateApiLanMouseServerCancellationTokenWrapperIsCancelled(
-        that: this,
-      );
+  @protected
+  void sse_encode_bool(bool self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    serializer.buffer.putUint8(self ? 1 : 0);
+  }
 }
 
 @sealed

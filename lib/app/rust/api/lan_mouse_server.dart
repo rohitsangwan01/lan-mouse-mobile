@@ -7,9 +7,7 @@ import '../frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 // These functions are ignored because they are not marked as `pub`: `get_certificate`
-
-Future<CancellationTokenWrapper> createCancellationToken() =>
-    RustLib.instance.api.crateApiLanMouseServerCreateCancellationToken();
+// These types are ignored because they are not used by any `pub` functions: `DartCommand`
 
 Future<(SenderWrapper, ReceiverWrapper)> createChannel() =>
     RustLib.instance.api.crateApiLanMouseServerCreateChannel();
@@ -21,21 +19,9 @@ Stream<Uint8List> connect(
         {required String basePath,
         required String ipAddSrt,
         required int port,
-        required ReceiverWrapper rx,
-        required CancellationTokenWrapper cancelToken}) =>
+        required ReceiverWrapper rx}) =>
     RustLib.instance.api.crateApiLanMouseServerConnect(
-        basePath: basePath,
-        ipAddSrt: ipAddSrt,
-        port: port,
-        rx: rx,
-        cancelToken: cancelToken);
-
-// Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<CancellationTokenWrapper>>
-abstract class CancellationTokenWrapper implements RustOpaqueInterface {
-  Future<void> cancel();
-
-  Future<bool> isCancelled();
-}
+        basePath: basePath, ipAddSrt: ipAddSrt, port: port, rx: rx);
 
 // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<ReceiverWrapper>>
 abstract class ReceiverWrapper implements RustOpaqueInterface {}
