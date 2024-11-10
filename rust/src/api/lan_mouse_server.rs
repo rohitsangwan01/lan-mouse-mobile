@@ -1,9 +1,4 @@
-use crate::api::client;
-use crate::api::connect::LanMouseConnection;
 use crate::api::crypto;
-use lan_mouse_ipc::ClientConfig;
-use lan_mouse_ipc::ClientHandle;
-use lan_mouse_ipc::ClientState;
 use lan_mouse_proto::ProtoEvent;
 use lan_mouse_proto::MAX_EVENT_SIZE;
 use std::sync::Arc;
@@ -13,7 +8,6 @@ use std::{
     str::FromStr,
 };
 use tokio::net::UdpSocket;
-use tokio::task::LocalSet;
 use webrtc_dtls::crypto::Certificate;
 use webrtc_dtls::{
     config::{Config, ExtendedMasterSecretType},
@@ -98,84 +92,3 @@ pub async fn connect(base_path: String, ip_add_srt: &str, port: u16) {
         }
     }
 }
-
-// pub async fn connect(base_path: String, ip_add_srt: &str, port: u16) {
-//     let runtime = tokio::runtime::Builder::new_current_thread()
-//         .enable_io()
-//         .enable_time()
-//         .build()
-//         .unwrap();
-//     runtime.block_on(LocalSet::new().run_until(run_connection(base_path)));
-// }
-
-// async fn run_connection(base_path: String) {
-//     let config_path = PathBuf::from(base_path);
-//     let cert_path = config_path.join("lan-mouse.pem");
-//     println!("{:?}", cert_path);
-
-//     let cert = match crypto::load_or_generate_key_and_cert(&cert_path) {
-//         Ok(c) => c,
-//         Err(err) => {
-//             println!("Failed to generate cert: {:?}", err);
-//             return;
-//         }
-//     };
-//     let fingerprint = crypto::certificate_fingerprint(&cert);
-//     println!("Certificate fingerprint: {fingerprint}");
-
-//     let client_manager = client::ClientManager::default();
-
-//     let handle = add_client(&client_manager, "192.168.1.49", 4242);
-
-//     let mut connection: LanMouseConnection = LanMouseConnection::new(cert, client_manager.clone());
-
-//     if let Err(err) = connection.send(ProtoEvent::Ping, handle).await {
-//         println!("Failed to send ping: {:?}", err);
-//         // return;
-//     }
-//     if let Err(err) = connection.send(ProtoEvent::Ping, handle).await {
-//         println!("Failed to send ping: {:?}", err);
-//         // return;
-//     }
-
-//     loop {
-//         let (handle, event) = connection.recv().await;
-//         println!("Event from {handle} {event}")
-//     }
-// }
-
-// fn add_client(client_manager: &client::ClientManager, ip_add_srt: &str, port: u16) -> ClientHandle {
-//     let handle = client_manager.add_client();
-//     let ip_address = match IpAddr::from_str(ip_add_srt) {
-//         Ok(address) => address,
-//         Err(err) => {
-//             println!("Failed to parse IP address: {:?}", err);
-//             return handle;
-//         }
-//     };
-//     client_manager.set_config(
-//         handle,
-//         ClientConfig {
-//             hostname: Some(ip_add_srt.to_string()),
-//             port,
-//             fix_ips: vec![ip_address],
-//             ..Default::default()
-//         },
-//     );
-//     let socket_add = SocketAddr::new(ip_address, port);
-//     client_manager.set_active_addr(handle, Some(socket_add));
-
-//     client_manager.set_state(
-//         handle,
-//         ClientState {
-//             active: true,
-//             active_addr: Some(socket_add),
-//             alive: true,
-//             ips: vec![ip_address].into_iter().collect(),
-//             ..Default::default()
-//         },
-//     );
-
-//     client_manager.activate_client(handle);
-//     handle
-// }
