@@ -50,7 +50,6 @@ class LanMouseServer {
   }
 
   void leaveClient() {
-    // Send empty data to close all
     _sender?.send(data: []);
     _streamSubscription?.cancel();
     _sender = null;

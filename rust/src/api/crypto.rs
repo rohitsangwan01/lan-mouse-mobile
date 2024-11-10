@@ -1,3 +1,5 @@
+// https://github.com/feschber/lan-mouse/blob/main/src/crypto.rs
+
 use std::fs;
 use std::io::{self, BufWriter, Read, Write};
 use std::path::Path;

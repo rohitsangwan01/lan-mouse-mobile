@@ -33,12 +33,12 @@ impl SenderWrapper {
         }
     }
 }
-
 pub fn create_channel() -> (SenderWrapper, ReceiverWrapper) {
     let channel = channel::<Vec<u8>>(256);
     (SenderWrapper(channel.0), ReceiverWrapper(channel.1))
 }
 
+/// Start a UdbSocket and create connection with given Client
 pub async fn connect(
     base_path: String,
     ip_add_srt: &str,
@@ -76,6 +76,7 @@ pub async fn connect(
     let mut receiver = rx.0;
     let mut buf = [0u8; MAX_EVENT_SIZE];
 
+    log::info!("Starting loop");
     loop {
         tokio::select! {
             // Listen for incoming DTLS messages
@@ -111,6 +112,7 @@ pub async fn connect(
             },
         }
     }
+    log::info!("Closing connection");
 }
 
 pub fn get_fingerprint(path: String) -> Option<String> {
