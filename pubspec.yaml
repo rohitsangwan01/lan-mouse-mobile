@@ -1,7 +1,7 @@
 name: lan_mouse_mobile
 description: "Mobile client for LanMouse"
 publish_to: "none"
-version: 0.0.1+1
+version: 0.0.2+1
 
 environment:
   sdk: ^3.5.4
@@ -15,6 +15,10 @@ dependencies:
   flutter_svg: ^2.0.14
   shared_preferences: ^2.3.3
   virtual_keyboard_custom_layout: ^1.0.0
+  path_provider: ^2.1.5
+  flutter_rust_bridge: 2.6.0
+  rust_lib_lan_mouse_mobile:
+    path: rust_builder
 
 dev_dependencies:
   flutter_test:
@@ -22,6 +26,8 @@ dev_dependencies:
   flutter_lints: ^4.0.0
   flutter_launcher_icons: ^0.14.1
   rename_app: ^1.6.1
+  integration_test:
+    sdk: flutter
 
 flutter:
   uses-material-design: true

@@ -24,7 +24,6 @@ class _HomeConnectionsState extends State<HomeConnections> {
   }
 
   void connectClient(Client client) async {
-    lanMouseServer.startServer(ignoreIfAlreadyRunning: true);
     Navigator.push(
       context,
       MaterialPageRoute(

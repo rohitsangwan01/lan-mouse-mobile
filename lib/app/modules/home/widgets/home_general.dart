@@ -12,6 +12,7 @@ class HomeGeneral extends StatefulWidget {
 
 class _HomeGeneralState extends State<HomeGeneral> {
   LanMouseServer lanMouseServer = LanMouseServer.instance;
+  String fingerprint = "";
 
   var portController = TextEditingController();
   var hostnameController = TextEditingController();
@@ -19,32 +20,33 @@ class _HomeGeneralState extends State<HomeGeneral> {
   @override
   void initState() {
     super.initState();
-    loadIp();
+    portController.text = lanMouseServer.defaultClient.port.toString();
+    hostnameController.text = lanMouseServer.defaultClient.host;
+    _refreshData();
   }
 
-  void loadIp() async {
-    hostnameController.text = lanMouseServer.host;
-    portController.text = lanMouseServer.port.toString();
+  void _refreshData() async {
+    // Load Ip
     try {
       NetworkInfo network = NetworkInfo();
       hostnameController.text = (await network.getWifiIP()) ?? "127.0.0.1";
     } catch (e) {
-      print("NetworkInfoError: $e");
+      showSnackbar("NetworkInfoError: $e");
     }
-    _syncHostAndPort();
-  }
-
-  void toggleServer(bool isRunning) async {
-    _syncHostAndPort();
+    // Load FingerPrint
     try {
-      if (!isRunning) {
-        await lanMouseServer.startServer();
+      String? data = await lanMouseServer.getFingerprint();
+      if (data != null) {
+        setState(() {
+          fingerprint = data;
+        });
       } else {
-        lanMouseServer.stopServer();
+        showSnackbar("Failed to get fingerprint");
       }
     } catch (e) {
-      showSnackbar(e);
+      showSnackbar("Failed to get fingerprint: $e");
     }
+    _syncHost();
   }
 
   void showSnackbar(message) {
@@ -55,9 +57,9 @@ class _HomeGeneralState extends State<HomeGeneral> {
     }
   }
 
-  void _syncHostAndPort() {
-    lanMouseServer.host = hostnameController.text;
-    lanMouseServer.port = int.parse(portController.text);
+  void _syncHost() {
+    lanMouseServer.defaultClient.host = hostnameController.text;
+    lanMouseServer.defaultClient.port = int.parse(portController.text);
   }
 
   @override
@@ -72,17 +74,9 @@ class _HomeGeneralState extends State<HomeGeneral> {
               "General",
               style: Theme.of(context).textTheme.titleSmall,
             ),
-            ValueListenableBuilder<bool>(
-              valueListenable: lanMouseServer.isSocketRunning,
-              builder: (context, isRunning, _) {
-                return IconButton(
-                  onPressed: () => toggleServer(isRunning),
-                  icon: Icon(
-                    Icons.lan,
-                    color: isRunning ? Colors.green : null,
-                  ),
-                );
-              },
+            IconButton(
+              onPressed: _refreshData,
+              icon: const Icon(Icons.refresh),
             ),
           ],
         ),
@@ -133,12 +127,35 @@ class _HomeGeneralState extends State<HomeGeneral> {
                     ),
                     const SizedBox(width: 2),
                     InkWell(
-                      onTap: loadIp,
-                      child: const Icon(Icons.refresh),
+                      onTap: () {
+                        Clipboard.setData(
+                          ClipboardData(text: hostnameController.text),
+                        );
+                      },
+                      child: const Icon(Icons.copy),
                     ),
                   ],
                 ),
-              )
+              ),
+              const Divider(),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: ListTile(
+                  minVerticalPadding: 0,
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.fingerprint),
+                  title: const Text("Certificate Fingerprint"),
+                  subtitle: Text(
+                    fingerprint,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  onTap: () {
+                    Clipboard.setData(ClipboardData(text: fingerprint));
+                    showSnackbar("Fingerprint copied to clipboard");
+                  },
+                ),
+              ),
+              const SizedBox(height: 15),
             ],
           ),
         )
