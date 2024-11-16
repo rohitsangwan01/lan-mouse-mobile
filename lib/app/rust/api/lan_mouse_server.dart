@@ -8,8 +8,8 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 // These functions are ignored because they are not marked as `pub`: `get_certificate`
 
-Future<(SenderWrapper, ReceiverWrapper)> createChannel() =>
-    RustLib.instance.api.crateApiLanMouseServerCreateChannel();
+Future<(SenderWrapper, ReceiverWrapper)> createU8Channel() =>
+    RustLib.instance.api.crateApiLanMouseServerCreateU8Channel();
 
 /// Start a UdbSocket and create connection with given Client
 Stream<Uint8List> connect(

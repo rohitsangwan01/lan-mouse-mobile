@@ -68,7 +68,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.6.0';
 
   @override
-  int get rustContentHash => -1167507244;
+  int get rustContentHash => -210735610;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -91,7 +91,7 @@ abstract class RustLibApi extends BaseApi {
       required ReceiverWrapper rx});
 
   Future<(SenderWrapper, ReceiverWrapper)>
-      crateApiLanMouseServerCreateChannel();
+      crateApiLanMouseServerCreateU8Channel();
 
   Future<String?> crateApiLanMouseServerGetFingerprint({required String path});
 
@@ -202,7 +202,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @override
   Future<(SenderWrapper, ReceiverWrapper)>
-      crateApiLanMouseServerCreateChannel() {
+      crateApiLanMouseServerCreateU8Channel() {
     return handler.executeNormal(NormalTask(
       callFfi: (port_) {
         final serializer = SseSerializer(generalizedFrbRustBinding);
@@ -214,15 +214,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             sse_decode_record_auto_owned_rust_opaque_flutter_rust_bridgefor_generated_rust_auto_opaque_inner_sender_wrapper_auto_owned_rust_opaque_flutter_rust_bridgefor_generated_rust_auto_opaque_inner_receiver_wrapper,
         decodeErrorData: null,
       ),
-      constMeta: kCrateApiLanMouseServerCreateChannelConstMeta,
+      constMeta: kCrateApiLanMouseServerCreateU8ChannelConstMeta,
       argValues: [],
       apiImpl: this,
     ));
   }
 
-  TaskConstMeta get kCrateApiLanMouseServerCreateChannelConstMeta =>
+  TaskConstMeta get kCrateApiLanMouseServerCreateU8ChannelConstMeta =>
       const TaskConstMeta(
-        debugName: "create_channel",
+        debugName: "create_u8_channel",
         argNames: [],
       );
 

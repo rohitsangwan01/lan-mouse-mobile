@@ -31,7 +31,7 @@ class LanMouseServer {
     required Client client,
     required Function(String) onError,
   }) async {
-    var (sender, receiver) = await rust.createChannel();
+    var (sender, receiver) = await rust.createU8Channel();
     _sender = sender;
 
     Stream<Uint8List> stream = rust.connect(

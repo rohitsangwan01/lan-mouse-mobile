@@ -24,19 +24,27 @@ pub fn init_app() {
 }
 
 /// Channel Wrappers
-pub struct ReceiverWrapper(Receiver<Vec<u8>>);
-pub struct SenderWrapper(Sender<Vec<u8>>);
-impl SenderWrapper {
-    pub async fn send(&self, data: Vec<u8>) {
-        if let Err(err) = self.0.send(data).await {
-            log::error!("Failed to send event {err}");
+macro_rules! create_channel_wrapper {
+    ($name:ident, $type:ty) => {
+        pub struct SenderWrapper(Sender<$type>);
+        pub struct ReceiverWrapper(Receiver<$type>);
+
+        impl SenderWrapper {
+            pub async fn send(&self, data: $type) {
+                if let Err(err) = self.0.send(data).await {
+                    log::error!("Failed to send event {err}");
+                }
+            }
         }
-    }
+
+        pub fn $name() -> (SenderWrapper, ReceiverWrapper) {
+            let channel = channel::<$type>(256);
+            (SenderWrapper(channel.0), ReceiverWrapper(channel.1))
+        }
+    };
 }
-pub fn create_channel() -> (SenderWrapper, ReceiverWrapper) {
-    let channel = channel::<Vec<u8>>(256);
-    (SenderWrapper(channel.0), ReceiverWrapper(channel.1))
-}
+
+create_channel_wrapper!(create_u8_channel, Vec<u8>);
 
 /// Start a UdbSocket and create connection with given Client
 pub async fn connect(
